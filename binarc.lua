@@ -55,7 +55,7 @@ end
 
 local args = {...}
 
-if (args[1] == 'update' and #args > 1) or (#args < 2) then
+if (args[1] == 'update' and #args > 1) or (args[1] ~= 'update' and #args < 2) then
     return usage()
 end
 
@@ -197,7 +197,7 @@ elseif command == 'list' then
     archivePrint(archive)
 elseif command == 'update' then -- grabs the latest release from github for stability
     print('Downloading latest binarc version from GitHub...')
-    local newBinarc = http.get("https://github.com/Rexxt/cc-binarc/releases/download/latest/binarc.lua")
+    local _, _, newBinarc = http.get("https://github.com/Rexxt/cc-binarc/releases/latest/download/binarc.lua")
     local src = newBinarc.readAll()
     newBinarc.close()
     print('Writing latest binarc version to disk...')
