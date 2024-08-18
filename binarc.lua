@@ -34,6 +34,7 @@ local function usage()
     print('  remove:  remove files or folders from the specified archive')
     print('  extract: write all of the files and folders in a specified archive to local storage')
     print('  list:    list every file on the archive')
+    print('  update:  update binarc (if you have installed binarc on a dedicated package platform, we recommend you use that instead.)')
     return 127
 end
 
@@ -54,12 +55,15 @@ end
 
 local args = {...}
 
-if #args < 2 then
+if (args[1] == 'update' and #args > 1) or (#args < 2) then
     return usage()
 end
 
 local command = args[1]
-local archivePath = shell.resolve(args[2])
+local archivePath = ''
+if command ~= 'update' then
+    archivePath = shell.resolve(args[2])
+end
 
 if command == 'add' then
     if #args < 3 then
@@ -191,6 +195,20 @@ elseif command == 'list' then
     end
 
     archivePrint(archive)
+elseif command == 'update' then -- grabs the latest release from github for stability
+    print('Downloading latest binarc version from GitHub...')
+    local newBinarc = http.get("https://github.com/Rexxt/cc-binarc/releases/download/latest/binarc.lua")
+    local src = newBinarc.readAll()
+    newBinarc.close()
+    print('Writing latest binarc version to disk...')
+
+    local file = fs.open(shell.getRunningProgram(), 'w')
+    file.write(src)
+    file.close()
+
+    term.setTextColor(colors.green)
+    print('binarc is now up to date!')
+    term.setTextColor(colors.white)
 else
     return usage()
 end
