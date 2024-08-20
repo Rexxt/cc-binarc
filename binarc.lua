@@ -158,7 +158,7 @@ elseif command == 'remove' then
             if #pathComponents == 1 then
                 archive[v] = nil
             else
-                removeList(archive[pathComponents[1]], fs.combine((unpack or table.unpack)(table.slice(pathComponents, 2))))
+                removeList(archive[pathComponents[1]], {fs.combine((unpack or table.unpack)(table.slice(pathComponents, 2)))})
             end
         end
     end
