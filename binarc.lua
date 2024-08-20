@@ -2,7 +2,8 @@
 -- for ComputerCraft
 -- bundles multiple files in a single binary file
 
-local binser = require 'lib.binser'
+local binser = require '.lib.binser'
+local binarc_version = '0.1.4'
 
 function table.slice(tbl, first, last, step)
     local sliced = {}
@@ -13,6 +14,21 @@ function table.slice(tbl, first, last, step)
     
     return sliced
 end
+
+--  https://stackoverflow.com/a/7615129
+function splitString(inputstr, sep)
+    if sep == nil then
+        sep = "%s"
+    end
+
+    local t = {}
+    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+        table.insert(t, str)
+    end
+
+    return t
+end
+
 
 local function tablePrint(t)
     for k, v in pairs(t) do
@@ -27,6 +43,7 @@ local function tablePrint(t)
 end
 
 local function usage()
+    print('BINary ARChive version ' .. binarc_version)
     print('Usage:')
     print('  binarc <command> <archive> [optional parameters...]')
     print('Commands:')
@@ -117,7 +134,39 @@ if command == 'add' then
     local archiveSize = writeArchive(archivePath, archive)
     print('Total archive size: ' .. archiveSize .. ' B')
 elseif command == 'remove' then
+    if #args < 3 then
+        print('Must provide at least one file or folder to remove from the archive.')
+        return 127
+    end
 
+    local archive = {}
+    if fs.exists(archivePath) then
+        archive = mountArchive(archivePath)
+    else
+        print('Archive not found.')
+        return 127
+    end
+
+    local files = {}
+    for i = 3, #args do
+        table.insert(files, args[i])
+    end
+
+    local function removeList(archive, files)
+        for i, v in ipairs(files) do
+            local pathComponents = splitString(v, '/')
+            if #pathComponents == 1 then
+                archive[v] = nil
+            else
+                removeList(archive[pathComponents[1]], fs.combine((unpack or table.unpack)(table.slice(pathComponents, 2))))
+            end
+        end
+    end
+
+    removeList(archive, files)
+
+    local archiveSize = writeArchive(archivePath, archive)
+    print('Total archive size: ' .. archiveSize .. ' B')
 elseif command == 'extract' then
     if #args > 3 then
         print('Expected either no argument at all, or a directory path to extract to')
