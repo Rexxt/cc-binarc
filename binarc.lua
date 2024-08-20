@@ -246,7 +246,7 @@ elseif command == 'list' then
     archivePrint(archive)
 elseif command == 'update' then -- grabs the latest release from github for stability
     print('Downloading latest binarc version from GitHub...')
-    local _, _, newBinarc = http.get("https://github.com/Rexxt/cc-binarc/releases/latest/download/binarc.lua")
+    local newBinarc = http.get("https://github.com/Rexxt/cc-binarc/releases/latest/download/binarc.lua")
     local src = newBinarc.readAll()
     newBinarc.close()
     print('Writing latest binarc version to disk...')
